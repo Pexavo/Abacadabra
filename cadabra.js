@@ -21,10 +21,13 @@ drill();
 function drill() {
     const workDays = getWorkingDayRows().map(it => convertRowToModel(it));
 
+    const globalOverview = [];
+
     workDays.forEach(day => {
         const errors = checkDayIntegrity(day);
 
         if (errors.length > 0) {
+            globalOverview.push({day: day.date, errorCount: errors.length});
             day.statusCell.parentElement.style.backgroundColor = 'rgba(255,0,0,0.77)';
             const ul = document.createElement('ul');
             errors.forEach(error => ul.appendChild(createErrorListItem(error)));
@@ -32,6 +35,9 @@ function drill() {
         }
 
     });
+
+    createGlobalStatusBar(globalOverview);
+
 }
 
 /**
@@ -70,8 +76,7 @@ function extractBeepsFromRow(tableRow) {
     const nodeList = tableRow.querySelectorAll('td:nth-child(3) span.ddTitleText span.ddTitleText').values();
     return Array.from(nodeList)
         .map(beep => {
-            const beepTime = beep.parentElement.parentElement.
-            parentElement.parentElement.querySelector('input:nth-child(2)').value;
+            const beepTime = beep.parentElement.parentElement.parentElement.parentElement.querySelector('input:nth-child(2)').value;
             return [beep.innerHTML, beepTime];
         })
         .filter(beep => beep[0]);
@@ -132,6 +137,21 @@ function checkLastItemValidity(beep, index, errors, beepValue, allBeeps) {
 function checkItemContinuity(beep, index, errors, beepValue, previousBeep, beepTime) {
     if (previousBeep && previousBeep.opening === beep.opening) {
         errors.push(`The entry <u>${previousBeep.name}</u> cannot be followed by <u>${beepValue}</u> at the time ${beepTime}`);
+    }
+}
+
+function createGlobalStatusBar(globalOverview) {
+    if (globalOverview.length > 0) {
+        const info = document.createElement('div');
+        info.style.marginTop = '1rem';
+        let text = '<h3 style="margin-bottom: 1rem">Some issues with your presence were found:</h3>' +
+            '<ul style="padding-left: 1rem">';
+        globalOverview.forEach(key => {
+            text = text.concat(`<li>${key.day} - ${key.errorCount} errors</li>`);
+        });
+        text = text.concat('</ul>');
+        info.innerHTML = text;
+        document.querySelector('#sidebar').append(info);
     }
 }
 
