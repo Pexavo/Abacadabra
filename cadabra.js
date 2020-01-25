@@ -25,7 +25,7 @@ function drill() {
         const errors = checkDayIntegrity(day);
 
         if (errors.length > 0) {
-            day.statusCell.style.backgroundColor = 'rgba(255,0,0,0.77)';
+            day.statusCell.parentElement.style.backgroundColor = 'rgba(255,0,0,0.77)';
             const ul = document.createElement('ul');
             errors.forEach(error => ul.appendChild(createErrorListItem(error)));
             day.statusCell.appendChild(ul);
@@ -64,13 +64,17 @@ function extractStatusTableCell(tableRow) {
  * This function consumes a HTML element and tries to extract
  * all values of time entries in order as they have been inserted.
  * @param tableRow: HTMLElement
- * @returns {string[]}
+ * @returns {[*|string, *][]}
  */
 function extractBeepsFromRow(tableRow) {
     const nodeList = tableRow.querySelectorAll('td:nth-child(3) span.ddTitleText span.ddTitleText').values();
     return Array.from(nodeList)
-        .map(beep => beep.innerHTML)
-        .filter(beep => beep);
+        .map(beep => {
+            const beepTime = beep.parentElement.parentElement.
+            parentElement.parentElement.querySelector('input:nth-child(2)').value;
+            return [beep.innerHTML, beepTime];
+        })
+        .filter(beep => beep[0]);
 }
 
 /**
@@ -101,14 +105,14 @@ function checkDayIntegrity(dayInfo) {
     let lastBeep;
     const errors = [];
     dayInfo.beeps.forEach((it, index, allBeeps) => {
-        const beepInfo = beepMap[it];
+        const beepInfo = beepMap[it[0]];
 
-        checkFirstItemValidity(beepInfo, index, errors, it);
-        checkLastItemValidity(beepInfo, index, errors, it, allBeeps);
-        checkItemContinuity(beepInfo, index, errors, it, lastBeep);
+        checkFirstItemValidity(beepInfo, index, errors, it[0]);
+        checkLastItemValidity(beepInfo, index, errors, it[0], allBeeps);
+        checkItemContinuity(beepInfo, index, errors, it[0], lastBeep, it[1]);
 
         lastBeep = beepInfo;
-        lastBeep['name'] = it;
+        lastBeep['name'] = it[0];
     });
     return errors;
 }
@@ -125,9 +129,9 @@ function checkLastItemValidity(beep, index, errors, beepValue, allBeeps) {
     }
 }
 
-function checkItemContinuity(beep, index, errors, beepValue, previousBeep) {
+function checkItemContinuity(beep, index, errors, beepValue, previousBeep, beepTime) {
     if (previousBeep && previousBeep.opening === beep.opening) {
-        errors.push(`The entry ${previousBeep.name} cannot be followed by ${beepValue}`);
+        errors.push(`The entry <u>${previousBeep.name}</u> cannot be followed by <u>${beepValue}</u> at the time ${beepTime}`);
     }
 }
 
