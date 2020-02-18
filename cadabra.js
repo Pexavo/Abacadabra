@@ -3,7 +3,7 @@ const beepMap = {
     "Odchod": {first: false, last: true, opening: false},
     "Přestávka": {first: false, last: false, opening: false},
     "Služební cesta": {first: true, last: false, opening: true},
-    "Dovolená": {first: true, last: true, opening: true},
+    "Dovolená": {first: true, last: true, opening: false},
     "Lékař": {first: true, last: true, opening: true},
     "Paragraf": {first: true, last: true, opening: true},
     "Nemoc": {first: true, last: true, opening: true},
