@@ -3,6 +3,11 @@
   "name": "Abacadabra organized plugin",
   "description": "Temporal fields succession checker",
   "version": "1.1",
+  "icons": {
+    "16": "icons/giraffe_16.png",
+    "48": "icons/giraffe_48.png",
+    "128": "icons/giraffe_128.png"
+  },
   "content_scripts": [ {
     "matches": ["https://jobabacus.in.edhouse.cz/*"],
     "js": ["cadabra.js"]
