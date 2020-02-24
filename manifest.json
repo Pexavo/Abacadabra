@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Abacadabra organized plugin",
   "description": "Temporal fields succession checker",
-  "version": "1.0",
+  "version": "1.1",
   "content_scripts": [ {
     "matches": ["https://jobabacus.in.edhouse.cz/*"],
     "js": ["cadabra.js"]
