@@ -22,16 +22,18 @@ function drill() {
     const workDays = getWorkingDayRows().map(it => convertRowToModel(it));
 
     const globalOverview = [];
+    const currDateString = getCurrentDateString();
 
     workDays.forEach(day => {
         const errors = checkDayIntegrity(day);
 
-        if (errors.length > 0) {
+        if (currDateString === day.date) {
+            day.statusCell.parentElement.style.backgroundColor = 'rgba(12,144,45,0.57)';
+            appendWarningsToDay(day, errors, ['Today'])
+        } else if (errors.length > 0) {
             globalOverview.push({day: day.date, errorCount: errors.length});
             day.statusCell.parentElement.style.backgroundColor = 'rgba(255,0,0,0.77)';
-            const ul = document.createElement('ul');
-            errors.forEach(error => ul.appendChild(createErrorListItem(error)));
-            day.statusCell.appendChild(ul);
+            appendWarningsToDay(day, errors);
         }
 
     });
@@ -153,6 +155,24 @@ function createGlobalStatusBar(globalOverview) {
         info.innerHTML = text;
         document.querySelector('#sidebar').append(info);
     }
+}
+
+function appendWarningsToDay(day, errors, optionalMessages) {
+    const ul = document.createElement('ul');
+    if (optionalMessages) {
+        optionalMessages.forEach(message => ul.appendChild(createErrorListItem(message)));
+    }
+    errors.forEach(error => ul.appendChild(createErrorListItem(error)));
+    day.statusCell.appendChild(ul);
+}
+
+function zeroPad(num, places) {
+    return String(num).padStart(places, '0');
+}
+
+function getCurrentDateString() {
+    const currDate = new Date();
+    return `${zeroPad(currDate.getDate(), 2)}.${zeroPad(currDate.getMonth() + 1, 2)}.${currDate.getFullYear().toString().substr(2)}`;
 }
 
 
