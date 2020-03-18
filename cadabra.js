@@ -19,6 +19,7 @@ const beepMap = {
 drill();
 
 function drill() {
+    test();
     const workDays = getWorkingDayRows().map(it => convertRowToModel(it));
 
     const globalOverview = [];
@@ -40,6 +41,42 @@ function drill() {
 
     createGlobalStatusBar(globalOverview);
 
+}
+
+function test() {
+
+    const result = Array.from(
+        document.querySelectorAll('.log > strong'))
+        .map(it => it.childNodes)
+        .map(it => Array.from(it).map(that => that['wholeText']).filter(it => it !== undefined).filter(it => /Pr.ce.*/.test(it)))
+        .map(it => it[0].split(' ')[1])
+        .map(it => {
+            return {hrs: parseInt(it.split(':')[0]), mins: parseInt(it.split(':')[1])};
+        })
+        .filter(it => (it.hrs + it.mins) !== 0);
+
+    const workDays = getWorkingDayRows().length - result.length;
+
+    const minutesIntermediate = result.map(it => it.mins).reduce((a, b) => a + b);
+    let hoursTotal = result.map(it => it.hrs).reduce((a, b) => a + b) + Math.floor(minutesIntermediate / 60);
+    let minutesTotal = minutesIntermediate % 60;
+
+    const hoursToWorkInAllMonth = getWorkingDayRows().length * 8;
+
+    const minutesToWorkInAllMonth = hoursToWorkInAllMonth * 60;
+    const minutesWorkedInAllMonth = hoursTotal * 60 + minutesTotal;
+    const minutesRemainingInAllMonth = minutesToWorkInAllMonth - minutesWorkedInAllMonth;
+
+    const toWorkDaily = minutesRemainingInAllMonth / workDays;
+
+    console.log(`Worked for ${minutesWorkedInAllMonth} minutes from total of ${minutesToWorkInAllMonth} minutes monthly - remaining to work for ${minutesRemainingInAllMonth} - for the remaining ${workDays} days it is ${Math.floor(toWorkDaily / 60)}:${toWorkDaily % 60} per day`);
+
+
+    Array.from(document.querySelectorAll('.day-week .log')).filter(it => it.children.length == 0).forEach(it => {
+        const note = document.createElement('span');
+        note.innerText = `You should work ${Math.floor(toWorkDaily / 60)} hours and ${Math.floor(toWorkDaily % 60)} minutes`;
+        it.appendChild(note);
+    });
 }
 
 /**
