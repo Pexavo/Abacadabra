@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Abacadabra organized plugin",
   "description": "Temporal fields succession checker",
-  "version": "1.2",
+  "version": "1.3",
   "icons": {
     "16": "icons/giraffe_16.png",
     "48": "icons/giraffe_48.png",

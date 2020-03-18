@@ -72,14 +72,16 @@ function extractStatusTableCell(tableRow) {
  * This function consumes a HTML element and tries to extract
  * all values of time entries in order as they have been inserted.
  * @param tableRow: HTMLElement
- * @returns {[*|string, *][]}
+ * @returns {[string, string, string, HTMLInputElement][]}
  */
 function extractBeepsFromRow(tableRow) {
     const nodeList = tableRow.querySelectorAll('td:nth-child(3) span.ddTitleText span.ddTitleText').values();
     return Array.from(nodeList)
         .map(beep => {
             const beepTime = beep.parentElement.parentElement.parentElement.parentElement.querySelector('input:nth-child(2)').value;
-            return [beep.innerHTML, beepTime];
+            const dateInputElement = beep.parentElement.parentElement.parentElement.parentElement.querySelector('input:nth-child(1)');
+            const beepDate = dateInputElement.value;
+            return [beep.innerHTML, beepTime, beepDate, dateInputElement];
         })
         .filter(beep => beep[0]);
 }
@@ -117,6 +119,7 @@ function checkDayIntegrity(dayInfo) {
         checkFirstItemValidity(beepInfo, index, errors, it[0]);
         checkLastItemValidity(beepInfo, index, errors, it[0], allBeeps);
         checkItemContinuity(beepInfo, index, errors, it[0], lastBeep, it[1]);
+        checkDateIntegrity(dayInfo.date, it, errors);
 
         lastBeep = beepInfo;
         lastBeep['name'] = it[0];
@@ -139,6 +142,12 @@ function checkLastItemValidity(beep, index, errors, beepValue, allBeeps) {
 function checkItemContinuity(beep, index, errors, beepValue, previousBeep, beepTime) {
     if (previousBeep && previousBeep.opening === beep.opening) {
         errors.push(`The entry <u>${previousBeep.name}</u> cannot be followed by <u>${beepValue}</u> at the time ${beepTime}`);
+    }
+}
+
+function checkDateIntegrity(dayDate, beepInfo, errors) {
+    if (!dayDate.startsWith(beepInfo[2])) {
+        errors.push(`The entry with time ${beepInfo[1]} has incorrect date value - ${beepInfo[2]}`);
     }
 }
 
